@@ -56,17 +56,19 @@ while last_count < target_count:
     print(f"Total Companies Found After Scrolling: {last_count}")
   
 
-all_companies = []
+json_filename = "yc.json"
 
-# Check if data.json already exists and load existing data
-if os.path.exists("yc.json"):
-    with open("yc.json", "r") as json_file:
+# Check if JSON file exists and load existing data
+if os.path.exists(json_filename):
+    with open(json_filename, "r") as file:
         try:
-            existing_data = json.load(json_file)
-            if isinstance(existing_data, list):  # Ensure it's a list
-                all_companies = existing_data
+            all_companies = json.load(file)
+            if not isinstance(all_companies, list):  
+                all_companies = []  # Ensure it's a list
         except json.JSONDecodeError:
             all_companies = []  # If file is empty or corrupt, start fresh
+else:
+    all_companies = []
 
 
 # Now that we've ensured we've loaded enough companies, loop through them to scrape details
@@ -205,9 +207,16 @@ for company in company_elements:
             }
 
     all_companies.append({"company": company, "founders": founders})    
+    with open(json_filename, "w") as file:
+        json.dump(all_companies, file, indent=4)
     
-with open("yc.json", "w") as file:
-    json.dump(all_companies, file, indent=4)
-# Close browser
+    print(json.dumps(all_companies, indent=4))  # Optional for debugging
+    total_companies = len(all_companies)
+    print(f"Total number of companies: {total_companies}")
+
+    
+# with open("yc.json", "w") as file:
+#     json.dump(all_companies, file, indent=4)
+# # Close browser
 driver.quit()
 
