@@ -5,8 +5,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-import time
+import os
 import json
+import time
 
 # Setup Chrome options
 chrome_options = Options()
@@ -55,6 +56,17 @@ while last_count < target_count:
     print(f"Total Companies Found After Scrolling: {last_count}")
   
 
+all_companies = []
+
+# Check if data.json already exists and load existing data
+if os.path.exists("yc.json"):
+    with open("yc.json", "r") as json_file:
+        try:
+            existing_data = json.load(json_file)
+            if isinstance(existing_data, list):  # Ensure it's a list
+                all_companies = existing_data
+        except json.JSONDecodeError:
+            all_companies = []  # If file is empty or corrupt, start fresh
 
 
 # Now that we've ensured we've loaded enough companies, loop through them to scrape details
@@ -70,24 +82,24 @@ for company in company_elements:
     try:
         batch = elements[0].text.strip() 
     except:
-        description = "No description available"
+        batch  = "No batch available"
 
     try:
         company_type = elements[1].text.strip() 
     except:
-        company_name = "No company name found"    
+        company_type = "No company type found"    
 
     try:
         industry_tags = elements[2].text.strip()  
     except:
-        company_name = "No company name found"    
+       industry_tags= "No company tag  found"    
 
 
 
     try:
         name = driver.find_element(By.TAG_NAME, "h1").text.strip()  
     except:
-        company_name = "No company name found"
+        name = "No company name found"
 
 
     prose_elements = driver.find_elements(By.CLASS_NAME, "prose") # new class
@@ -150,6 +162,23 @@ for company in company_elements:
 
     # print(they_dict)  # Print the dictionary
     
+    
+    # Store results
+    company = {
+        "name": name,
+        "tagline": tagline,
+        "description":description,
+        "batch": batch,
+        "company_type":company_type,
+        "industry_tags":industry_tags,
+        "location": location,
+        "website": website_url,
+        "founded": year_founded,
+        "team_size": team_size,
+        "social_profiles": social_links,
+        
+    }
+
     founders={}
     if len(cards) > 1:  
         for index, card in enumerate(cards[1:], start=0):  
@@ -175,31 +204,10 @@ for company in company_elements:
                 "twitter_profile": twitter_url
             }
 
+    all_companies.append({"company": company, "founders": founders})    
     
-    
-    # Store results
-    company = {
-        "name": name,
-        "tagline": tagline,
-        "description":description,
-        "batch": batch,
-        "company_type":company_type,
-        "industry_tags":industry_tags,
-        "location": location,
-        "website": website_url,
-        "founded": year_founded,
-        "team_size": team_size,
-        "social_profiles": social_links,
-        
-    }
-    founders={founders}
-    print(json.dumps(company, indent=4))
-   
-    
-
+with open("yc.json", "w") as file:
+    json.dump(all_companies, file, indent=4)
 # Close browser
 driver.quit()
 
-# Print results
-# for company in company_details:
-#     print(company)
