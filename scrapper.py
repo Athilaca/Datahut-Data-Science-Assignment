@@ -149,20 +149,6 @@ for company in company_elements:
                 social_links["facebook"] = href
             elif "crunchbase" in href:
                 social_links["crunchbase"] = href
-
-    # they_dict = {}
-
-    # for i in range(10, len(prose_elements)):
-    #     element = prose_elements[i]
-        
-    #     # Stop if the element has the specific class
-    #     if element.tag_name.lower() == "h4":
-    #        break
-
-    #     text = element.text.strip()
-    #     they_dict[i] = text  # Store in dictionary with index as key
-
-    # print(they_dict)  # Print the dictionary
     
     
     # Store results
@@ -181,7 +167,7 @@ for company in company_elements:
         
     }
 
-    founders={}
+    founders=[]
     if len(cards) > 1:  
         for index, card in enumerate(cards[1:], start=0):  
             card_text = card.text.strip().split("\n") 
@@ -200,11 +186,11 @@ for company in company_elements:
                 elif "twitter.com" in link:
                     twitter_url = link
 
-            founders[index] = {
+            founders.append({index : {
                 "name": name,
                 "linkedin_profile": linkedin_url,
                 "twitter_profile": twitter_url
-            }
+            }})
 
     all_companies.append({"company": company, "founders": founders})    
     with open(json_filename, "w") as file:
@@ -215,8 +201,5 @@ for company in company_elements:
     print(f"Total number of companies: {total_companies}")
 
     
-# with open("yc.json", "w") as file:
-#     json.dump(all_companies, file, indent=4)
-# # Close browser
 driver.quit()
 
